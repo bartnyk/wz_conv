@@ -36,12 +36,11 @@ python main.py --path /app/input --output /app/output
 - Results will be saved in the `output/` directory
 
 ```bash
-python main.py --path /app/input/my_file.pdf --output /app/output
+python main.py --path /app/input/my_file.pdf
 ```
 
-- For a single file, specify the path directly
-- The program will create a directory for the file in the output folder
-- The output will be saved in the specified directory
+- Run for single file `/app/input/my_file.pdf` 
+- The output will be saved in the same directory as the input file
 
 ## Directory Structure
 
@@ -54,6 +53,9 @@ python main.py --path /app/input/my_file.pdf --output /app/output
 - `scripts/install_cpu/` – setup scripts for CPU
 - `scripts/install_gpu/` – setup scripts for GPU
 
+## Environment Variables
+- `TESSERACT_CMD` – Path to the Tesseract OCR executable
+- `POPPLER_PATH` – Path to the Poppler package (e.g., `pdftoppm`)
 
 ## Notes
 
