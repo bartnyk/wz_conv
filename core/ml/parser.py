@@ -5,9 +5,10 @@ from typing import Optional
 
 import cv2
 import numpy as np
+from ml import IMG_HEIGHT, IMG_WIDTH
 from PIL import Image, ImageEnhance
 
-from ml import IMG_HEIGHT, IMG_WIDTH
+from core import cfg
 
 
 class ImageParser:
@@ -158,7 +159,6 @@ class ImageParser:
     def process_images_in_directory(cls, directory_path: str):
         """Przetwarza i augmentuje obrazy z katalogu wejściowego"""
         counter = 1
-        dir_name = os.path.dirname(directory_path)
 
         for filename in os.listdir(directory_path):
             if filename.lower().endswith(".png"):
@@ -196,5 +196,5 @@ class ImageParser:
 
 
 if __name__ == "__main__":
-    ImageParser.process_images_in_directory("../images/NO_WZ")
-    ImageParser.process_images_in_directory("../images/WZ")
+    ImageParser.process_images_in_directory(cfg.WZ_IMAGES_DIR_PATH)
+    ImageParser.process_images_in_directory(cfg.NOT_WZ_IMAGES_DIR_PATH)

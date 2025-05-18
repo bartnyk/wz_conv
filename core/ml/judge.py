@@ -12,7 +12,7 @@ from tensorflow.keras.layers import (
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
 
-from ml import IMAGES_DIR, IMG_HEIGHT, IMG_WIDTH, MODEL_PATH
+from core import cfg
 
 
 class ImageRecognizer:
@@ -20,25 +20,23 @@ class ImageRecognizer:
         self.model = model
 
     @classmethod
-    def load_model(cls, model_path: str = MODEL_PATH) -> "ImageRecognizer":
+    def load_model(cls, model_path: str = cfg.MODEL_PATH) -> "ImageRecognizer":
         model = load_model(model_path)
         return cls(model)
 
     def build(self):
         batch_size = 8
         channel = 1
-        cropped_height = IMG_HEIGHT // 4  # Nowa wysokość po przycięciu
+        cropped_height = cfg.IMG_HEIGHT // 4
 
-        # Funkcja do przycinania nagłówka
         def crop_header(image, label):
             return tf.image.crop_to_bounding_box(
-                image, 0, 0, cropped_height, IMG_WIDTH
+                image, 0, 0, cropped_height, cfg.IMG_WIDTH
             ), label
 
-        # Ładowanie danych bez użycia .load()
         train_ds = tf.keras.utils.image_dataset_from_directory(
-            IMAGES_DIR,
-            image_size=(IMG_HEIGHT, IMG_WIDTH),
+            cfg.IMAGES_DIR,
+            image_size=(cfg.IMG_HEIGHT, cfg.IMG_WIDTH),
             color_mode="grayscale",
             batch_size=batch_size,
             shuffle=True,
@@ -48,8 +46,8 @@ class ImageRecognizer:
         )
 
         val_ds = tf.keras.utils.image_dataset_from_directory(
-            IMAGES_DIR,
-            image_size=(IMG_HEIGHT, IMG_WIDTH),
+            cfg.IMAGES_DIR,
+            image_size=(cfg.IMG_HEIGHT, cfg.IMG_WIDTH),
             color_mode="grayscale",
             batch_size=batch_size,
             shuffle=True,
@@ -58,7 +56,6 @@ class ImageRecognizer:
             subset="validation",
         )
 
-        # Przycinanie i optymalizacja datasetów
         AUTOTUNE = tf.data.AUTOTUNE
 
         train_ds = train_ds.map(crop_header, num_parallel_calls=AUTOTUNE)
@@ -67,13 +64,12 @@ class ImageRecognizer:
         train_ds = train_ds.cache().prefetch(buffer_size=AUTOTUNE)
         val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
-        # Reszta kodu pozostaje bez zmian...
         model = Sequential([
             Conv2D(
                 32,
                 (5, 5),
                 activation="relu",
-                input_shape=(cropped_height, IMG_WIDTH, channel),
+                input_shape=(cropped_height, cfg.IMG_WIDTH, channel),
             ),
             MaxPooling2D((3, 3)),
             Conv2D(64, (3, 3), activation="relu"),
@@ -121,7 +117,7 @@ class ImageRecognizer:
 
         img_array = tf.keras.preprocessing.image.img_to_array(img) / 255.0
 
-        if len(img_array.shape) == 2:  # Dla obrazów w skali szarości
+        if len(img_array.shape) == 2:
             img_array = np.expand_dims(img_array, axis=-1)
         img_array = np.expand_dims(img_array, axis=0)
 

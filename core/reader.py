@@ -6,25 +6,19 @@ from typing import List, Optional
 
 import numpy as np
 import pytesseract
-import torch
 from easyocr import Reader
 from pdf2image import convert_from_path
 from PIL import Image
 
-from ml.core import ImageRecognizer
+from core import cfg
+from core.ml.judge import ImageRecognizer
 
-if tesseract_cmd := os.getenv("TESSERACT_CMD"):
-    pytesseract.pytesseract.tesseract_cmd = tesseract_cmd
+if cfg.TESSERACT_CMD:
+    pytesseract.pytesseract.tesseract_cmd = cfg.TESSERACT_CMD
 
-if gpu_enabled := torch.cuda.is_available():
-    torch.cuda.set_per_process_memory_fraction(0.4, 0)
-
-
-poppler_path = os.getenv("POPPLER_PATH")
-
+poppler_path = cfg.POPPLER_PATH
 recognizer = ImageRecognizer.load_model()
-
-reader = Reader(["en", "pl"], gpu=gpu_enabled)
+reader = Reader(["en", "pl"], gpu=cfg.GPU_ENABLED)
 
 
 class PdfImage:
@@ -75,9 +69,7 @@ class PdfFileProcessor:
         if not os.path.exists(self.file_path):
             raise FileNotFoundError(f"File {self.file_path} not found")
 
-        self.output_dir: str = self._ensure_dir_exists(
-            output_dir or self.file_path.replace(".pdf", "")
-        )
+        self.output_dir: str = self._ensure_dir_exists(output_dir)
         self.done_dir: str = self._ensure_dir_exists(self.done_dir_path)
         self._images: List[PdfImage] = []
         self._wz_aggregation: dict[str, list[Image]] = {}
