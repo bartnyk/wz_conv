@@ -16,7 +16,7 @@ from ml.core import ImageRecognizer
 if tesseract_cmd := os.getenv("TESSERACT_CMD"):
     pytesseract.pytesseract.tesseract_cmd = tesseract_cmd
 
-if torch.cuda.is_available():
+if gpu_enabled := torch.cuda.is_available():
     torch.cuda.set_per_process_memory_fraction(0.4, 0)
 
 
@@ -24,7 +24,7 @@ poppler_path = os.getenv("POPPLER_PATH")
 
 recognizer = ImageRecognizer.load_model()
 
-reader = Reader(["en", "pl"], gpu=False, download_enabled=False)
+reader = Reader(["en", "pl"], gpu=gpu_enabled)
 
 
 class PdfImage:
